@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,6 +18,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             AlarmManagerAppTheme {
                 val navController = rememberNavController()
+                val pageSoloViewModel = viewModel<PageSoloViewModel>()
+                val pageGroupsViewModel = viewModel<PageGroupsViewModel>()
 
                 NavigationBar()
 
@@ -25,8 +28,8 @@ class MainActivity : ComponentActivity() {
                     "PageSolo",
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    composable("PageSolo") { PageSolo() }
-                    composable("PageGroups") { PageGroups() }
+                    composable("PageSolo") { PageSolo(pageSoloViewModel) }
+                    composable("PageGroups") { PageGroups(pageGroupsViewModel) }
                     composable("PageSettings") { PageSettings() }
                 }
             }
