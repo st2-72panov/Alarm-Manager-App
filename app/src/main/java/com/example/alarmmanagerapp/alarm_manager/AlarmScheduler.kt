@@ -9,6 +9,7 @@ import java.time.ZoneId
 class AlarmScheduler(
     private val context: Context
 ) {
+
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
     fun schedule(item: AlarmItem) {
@@ -19,8 +20,9 @@ class AlarmScheduler(
             PendingIntent.FLAG_IMMUTABLE
         )
         val broadcastIntent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("title", item.title)
             putExtra("period", item.period)
+            putExtra("title", item.title)
+            putExtra("groupID", item.groupID)
         }
 
         alarmManager.setAlarmClock(
