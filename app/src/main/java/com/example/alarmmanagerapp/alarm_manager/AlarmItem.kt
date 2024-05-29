@@ -1,11 +1,7 @@
 package com.example.alarmmanagerapp.alarm_manager
-import androidx.core.graphics.toColor
 import java.time.DayOfWeek
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.TreeSet
-import kotlin.math.exp
-import kotlin.math.pow
 
 typealias CombinedID = Int
 typealias ID = Short
@@ -17,19 +13,18 @@ data class AlarmItem(
     val time: LocalTime,
     val weekDays: TreeSet<DayOfWeek>
 ) {
-    private val ID_PLUS_ONE = ID.MAX_VALUE + 1
 
     fun makeCombinedID(
         internalID: ID, groupID: ID
     ): CombinedID {
-        return groupID * ID_PLUS_ONE + internalID
+        return (groupID.toInt() shl 16) or internalID.toInt()
     }
 
     fun retrieveGroupID(combinedID: CombinedID): ID {
-        return (combinedID / ID_PLUS_ONE).toShort()
+        return (combinedID shr 16).toShort()
     }
 
     fun retrieveInternalID(combinedID: CombinedID): ID {
-        return (combinedID % ID_PLUS_ONE).toShort()
+        return combinedID.toShort()
     }
 }
