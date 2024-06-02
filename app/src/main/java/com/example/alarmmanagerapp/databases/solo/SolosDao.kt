@@ -15,11 +15,13 @@ interface SolosDao {
     @Delete
     suspend fun deleteEntity(soloAlarmEntity: SoloAlarmEntity)
 
-    @Query("SELECT * FROM ${SolosDB.NAME}")
-    fun getAll(): Flow<List<SoloAlarmEntity>>
-//    @Query("SELECT * FROM ${SolosDB.NAME} ORDER BY time ASC")
-//    suspend fun getEntitiesByTime(): Flow<List<SoloAlarmEntity>>
-//
-//    @Query("SELECT * FROM ${SolosDB.NAME} ORDER BY isOn ASC")
-//    suspend fun getEntitiesByIsOn(): Flow<List<SoloAlarmEntity>>
+    @Query(
+        "SELECT * FROM ${SolosDB.NAME} ORDER BY time ASC, weekDays ASC, title ASC, isOn ASC"
+    )
+    fun getEntitiesByTime(): Flow<List<SoloAlarmEntity>>
+
+    @Query(
+        "SELECT * FROM ${SolosDB.NAME} ORDER BY isOn ASC, time ASC, weekDays ASC, title ASC"
+    )
+    fun getEntitiesByIsOn(): Flow<List<SoloAlarmEntity>>
 }
