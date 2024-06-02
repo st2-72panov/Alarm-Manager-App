@@ -1,29 +1,28 @@
 package com.example.alarmmanagerapp.databases.solo
+
+import android.content.Context
 import com.example.alarmmanagerapp.util.WeekDays
 import java.time.LocalTime
 
 sealed interface SolosEvent {
-    data class SetTime(val id: Short, val time: LocalTime): SolosEvent
-    data class SetWeekDays(val id: Short, val weekDays: WeekDays): SolosEvent
-    data class SetTitle(val id: Short, val title: String): SolosEvent
-    data class SetOn(val id: Short, val on: Boolean): SolosEvent
+    data class SetTime(val alarm: SoloAlarmEntity, val time: LocalTime) : SolosEvent
+    data class SetWeekDays(val alarm: SoloAlarmEntity, val weekDays: WeekDays) : SolosEvent
+    data class SetTitle(val alarm: SoloAlarmEntity, val title: String) : SolosEvent
+    data class SetOn(val alarm: SoloAlarmEntity, val isOn: Boolean) : SolosEvent
 
-    data object ShowAddingDialog: SolosEvent
-    data object HideAddingDialog: SolosEvent
-    data class ShowEditingDialog(val id: Short): SolosEvent
-    data class HideEditingDialog(val id: Short): SolosEvent
-    data object SaveEntity: SolosEvent
+    data class ShowEditingDialog(val alarm: SoloAlarmEntity?) : SolosEvent
+    data object HideEditingDialog : SolosEvent
+    data class SaveEntity(val context: Context) : SolosEvent
 
-    data object EnterSelectView: SolosEvent
-    data object ExitSelectView: SolosEvent
-    data class SelectEntity(val id: Short): SolosEvent
-    data class UnselectEntity(val id: Short): SolosEvent
-    data object DeleteEntities: SolosEvent
+    data object EnterSelectView : SolosEvent
+    data object ExitSelectView : SolosEvent
+    data class SelectEntity(val alarm: SoloAlarmEntity) : SolosEvent
+    data class UnselectEntity(val alarm: SoloAlarmEntity) : SolosEvent
+    data class DeleteEntities(val context: Context) : SolosEvent
 
-    data class SortDB(val sortType: SortType): SolosEvent
+    data class SortDB(val sortType: SortType) : SolosEvent
 }
 
 enum class SortType {
-    Time,
-    IsOn
+    Time, IsOn
 }

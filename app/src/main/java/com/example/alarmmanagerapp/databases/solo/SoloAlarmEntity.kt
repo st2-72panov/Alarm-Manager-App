@@ -12,5 +12,5 @@ data class SoloAlarmEntity(
     val title: String,
     val isOn: Boolean,
     @PrimaryKey(autoGenerate = true)
-    val id: Short = 0
+    val id: Short? = null
 )
