@@ -15,7 +15,6 @@ import com.example.alarmmanagerapp.databases.solo.PageSoloViewModel
 import com.example.alarmmanagerapp.databases.solo.SolosDB
 import com.example.alarmmanagerapp.ui.NavigationBar
 import com.example.alarmmanagerapp.ui.PageSettings
-import com.example.alarmmanagerapp.ui.theme.AlarmManagerAppTheme
 
 class MainActivity : ComponentActivity() {
     private val solosDB by lazy {
@@ -38,20 +37,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AlarmManagerAppTheme {
-                val navController = rememberNavController()
-
-                NavigationBar()
-
-                NavHost(
-                    navController,
-                    "PageSolo",
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    composable("PageSolo") { PageSolo(pageSoloViewModel) }
-                    composable("PageGroups") { PageGroups() }
-                    composable("PageSettings") { PageSettings() }
-                }
+            val navController = rememberNavController()
+            NavHost(
+                navController,
+                "PageSolo",
+                modifier = Modifier.fillMaxSize()
+            ) {
+                composable("PageSolo") { PageSolo(pageSoloViewModel) }
+                composable("PageGroups") { PageGroups() }
+                composable("PageSettings") { PageSettings() }
             }
         }
     }
