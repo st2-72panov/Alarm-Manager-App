@@ -13,18 +13,19 @@ data class AlarmItem(
     val time: LocalTime,
     val weekDays: TreeSet<DayOfWeek>
 ) {
+    companion object {
+        fun makeCombinedID(
+            internalID: ID, groupID: ID
+        ): CombinedID {
+            return (groupID.toInt() shl 16) or internalID.toInt()
+        }
 
-    fun makeCombinedID(
-        internalID: ID, groupID: ID
-    ): CombinedID {
-        return (groupID.toInt() shl 16) or internalID.toInt()
-    }
+        fun retrieveGroupID(combinedID: CombinedID): ID {
+            return (combinedID shr 16).toShort()
+        }
 
-    fun retrieveGroupID(combinedID: CombinedID): ID {
-        return (combinedID shr 16).toShort()
-    }
-
-    fun retrieveInternalID(combinedID: CombinedID): ID {
-        return combinedID.toShort()
+        fun retrieveInternalID(combinedID: CombinedID): ID {
+            return combinedID.toShort()
+        }
     }
 }
