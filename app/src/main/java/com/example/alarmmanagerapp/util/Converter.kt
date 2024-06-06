@@ -38,3 +38,20 @@ class Converter {
         return LocalTime.ofSecondOfDay(time.toLong())
     }
 }
+
+fun fromWeekDaysToString(weekDays: WeekDays): String {
+    return if (weekDays.size == 0) "Однократно"
+    else weekDays.let {
+        it.joinToString(" ") { day ->
+            when (day) {
+                DayOfWeek.MONDAY -> "пн"
+                DayOfWeek.TUESDAY -> "вт"
+                DayOfWeek.WEDNESDAY -> "ср"
+                DayOfWeek.THURSDAY -> "чт"
+                DayOfWeek.FRIDAY -> "пт"
+                DayOfWeek.SATURDAY -> "сб"
+                DayOfWeek.SUNDAY -> "вс"
+            }
+        }
+    }
+}

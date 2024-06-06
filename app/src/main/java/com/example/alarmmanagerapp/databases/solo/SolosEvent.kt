@@ -21,6 +21,8 @@ sealed interface SolosEvent {
     data class DeleteEntities(val context: Context) : SolosEvent
 
     data class SortDB(val sortType: SortType) : SolosEvent
+
+    data class TestInsert(val alarmEntity: SoloAlarmEntity) : SolosEvent
 }
 
 enum class SortType {

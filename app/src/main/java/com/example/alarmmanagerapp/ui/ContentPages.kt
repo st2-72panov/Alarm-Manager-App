@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.sp
 import com.example.alarmmanagerapp.R
 import com.example.alarmmanagerapp.databases.groups.PageGroupsViewModel
 import com.example.alarmmanagerapp.databases.solo.PageSoloViewModel
+import com.example.alarmmanagerapp.ui.page_solo.PageSolo
+import com.example.alarmmanagerapp.ui.shared_functions.TopBarTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -165,7 +167,7 @@ fun ContentPages(
         ) {
             HorizontalPager(state = pagerState) { index ->
                 when (index) {
-                    0 -> PageSolo(pageSoloViewModel)
+                    0 -> PageSolo(pageSoloViewModel.pageState, pageSoloViewModel::onEvent)
                     1 -> PageGroups(pageGroupsViewModel)
                 }
             }

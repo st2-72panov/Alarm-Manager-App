@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.example.alarmmanagerapp.R
+import com.example.alarmmanagerapp.ui.shared_functions.TopBarTitle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
