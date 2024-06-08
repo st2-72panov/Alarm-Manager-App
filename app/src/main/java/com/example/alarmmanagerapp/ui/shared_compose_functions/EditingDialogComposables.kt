@@ -3,8 +3,8 @@ package com.example.alarmmanagerapp.ui.shared_compose_functions
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -33,18 +33,16 @@ fun WeekDaysCheckField(
     }
 
     Card(
-        Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(AppColor.dimmest1)
     ) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            for (day in DayOfWeek.entries)
+            for (day in DayOfWeek.entries.reversed())
                 TextButton(
-                    modifier = Modifier.requiredSize(40.dp, 50.dp),
+                    modifier = Modifier.requiredSize(50.dp, 35.dp),
                     onClick = {
                         if (day !in weekDays)
                             weekDays.add(day)
@@ -71,7 +69,7 @@ fun WeekDaysCheckField(
 fun CircularTimeLists(
     initialTime: LocalTime, onHourChanged: (Int) -> Unit, onMinuteChanged: (Int) -> Unit
 ) = Row(
-    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+    horizontalArrangement = Arrangement.SpaceEvenly
 ) {
     CircularList(
         initialItem = initialTime.hour, onItemSelected = { hour -> onHourChanged(hour) }, 23

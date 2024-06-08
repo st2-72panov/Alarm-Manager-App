@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.alarmmanagerapp.databases.solo.SoloAlarmEntity
@@ -39,9 +41,10 @@ import com.example.alarmmanagerapp.ui.shared_compose_functions.CircularTimeLists
 import com.example.alarmmanagerapp.ui.shared_compose_functions.TopBarTitle
 import com.example.alarmmanagerapp.ui.shared_compose_functions.WeekDaysCheckField
 
+@Preview()
 @Composable
 fun SolosEditingDialog(
-    alarmEntity: SoloAlarmEntity, onSave: (SoloAlarmEntity) -> Unit, onCancel: () -> Unit
+    alarmEntity: SoloAlarmEntity = SoloAlarmEntity(), onSave: (SoloAlarmEntity) -> Unit = {}, onCancel: () -> Unit = {}
 ) = Dialog(onDismissRequest = { /*do nothing*/ }) {
 
     var editingEntity by remember {
@@ -50,20 +53,16 @@ fun SolosEditingDialog(
     val interactionSource = remember { MutableInteractionSource() }
     val focusManager = LocalFocusManager.current
 
-    Card(  // TODO: colors
+    Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(AppColor.dimmest2),
         modifier = Modifier.clickable (
             interactionSource = interactionSource,
             indication = null
-        ) {
-            focusManager.clearFocus()
-        }
+        ) { focusManager.clearFocus() }
     ) {
-        Column(
-            Modifier.padding(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {  // TODO: space between
+
+        Column(Modifier.padding(10.dp, 20.dp, 10.dp, 10.dp)) {
             Spacer(Modifier.height(10.dp))
             TopBarTitle(
                 if (editingEntity.id == null) "Новый будильник"
@@ -71,50 +70,60 @@ fun SolosEditingDialog(
                 Modifier.fillMaxWidth()
             )
 
-            Box(
-                Modifier.height(200.dp),
-                contentAlignment = Alignment.Center
+            // Content
+            ///////////////////////
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                CircularTimeLists(initialTime = editingEntity.time, onHourChanged = { hour ->
-                    editingEntity = editingEntity.copy(time = editingEntity.time.withHour(hour))
-                }, onMinuteChanged = { minute ->
-                    editingEntity = editingEntity.copy(time = editingEntity.time.withMinute(minute))
-                })
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {  // TODO: space between
+                    Box(
+                        Modifier.height(200.dp).width(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularTimeLists(
+                            initialTime = editingEntity.time,
+                            onHourChanged = { hour ->
+                                editingEntity =
+                                    editingEntity.copy(time = editingEntity.time.withHour(hour))
+                            },
+                            onMinuteChanged = { minute ->
+                                editingEntity =
+                                    editingEntity.copy(time = editingEntity.time.withMinute(minute))
+                            })
+                    }
+
+                    Spacer(Modifier.height(5.dp))
+
+                    TextField(
+                        modifier = Modifier.width(230.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = AppColor.dimmest,
+                            unfocusedContainerColor = AppColor.dimmest,
+                            focusedTextColor = AppColor.light,
+                            unfocusedTextColor = AppColor.dim,
+                            cursorColor = AppColor.contrast,
+                            focusedIndicatorColor = AppColor.contrast
+                        ),
+                        maxLines = 3,
+                        value = editingEntity.title,
+                        onValueChange = { editingEntity = editingEntity.copy(title = it) }
+                    )
+                }
+
+                Spacer(Modifier.width(10.dp))
+
+                WeekDaysCheckField(
+                    editingEntity.weekDays
+                ) { weekDays ->
+                    editingEntity = editingEntity.copy(weekDays = weekDays)
+                }
             }
 
-            WeekDaysCheckField(
-                editingEntity.weekDays
-            ) { weekDays ->
-                editingEntity = editingEntity.copy(weekDays = weekDays)
-            }
-
-            Spacer(Modifier.height(5.dp))
-
-            TextField(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = AppColor.dimmest,
-                    unfocusedContainerColor = AppColor.dimmest,
-                    focusedTextColor = AppColor.light,
-                    unfocusedTextColor = AppColor.dim,
-                    cursorColor = AppColor.contrast,
-                    focusedIndicatorColor = AppColor.contrast
-                ),
-                maxLines = 3,
-                value = editingEntity.title,
-                onValueChange = { editingEntity = editingEntity.copy(title = it) }
-            )
-
-//            BasicTextField(
-//                modifier = Modifier.fillMaxWidth(),
-//                value = editingEntity.title,
-//                onValueChange = { editingEntity = editingEntity.copy(title = it) },
-//                maxLines = 3,
-//                textStyle = TextStyle(color = AppColor.light),
-//                cursorBrush = Brush.linearGradient(colors = listOf(AppColor.light))
-//            )
-
+            // Buttons
+            ///////////////////////
             Row(
                 Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
             ) {
