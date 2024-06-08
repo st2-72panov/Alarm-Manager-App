@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.alarmmanagerapp.alarm_manager.AlarmItem
 import com.example.alarmmanagerapp.alarm_manager.AlarmScheduler
 import com.example.alarmmanagerapp.util.SoloAlarms
-import com.example.alarmmanagerapp.util.WeekDays
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PageSoloViewModel(
@@ -22,25 +20,32 @@ class PageSoloViewModel(
 ) : ViewModel() {
 
     private val _sortType = MutableStateFlow(SortType.Time)
+    private val _inSelectView = MutableStateFlow(false)
+    private val _inEditingDialog = MutableStateFlow(false)
+
     private val _alarms = _sortType.flatMapLatest { sortType ->
         when (sortType) {
             SortType.Time -> dao.getEntitiesByTime()
             SortType.IsOn -> dao.getEntitiesByIsOn()
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
-    private val _selectedAlarms = MutableStateFlow(SoloAlarms())
-    private val _inSelectView = MutableStateFlow(false)
-    private val _inDialog = MutableStateFlow(false)
+    private val _selectedAlarms = MutableStateFlow<SoloAlarms?>(SoloAlarms())
+    private val _editingAlarm = MutableStateFlow<SoloAlarmEntity?>(SoloAlarmEntity())
 
     val pageState = combine(
-        _alarms, _sortType, _selectedAlarms, _inSelectView, _inDialog
-    ) { alarms, sortType, selectedAlarms, inSelectView, inDialog ->
+        _sortType, _inSelectView, _inEditingDialog, _alarms, _selectedAlarms, _editingAlarm
+    ) { args ->
+        @Suppress("UNCHECKED_CAST")  // checked)
         PageSoloState(
-            alarms, sortType, selectedAlarms, inSelectView, inDialog
+            args[0] as SortType,
+            args[1] as Boolean,
+            args[2] as Boolean,
+            args[3] as List<SoloAlarmEntity>,
+            args[4] as SoloAlarms?,
+            args[5] as SoloAlarmEntity?
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), PageSoloState())
 
-    private var editingEntity: SoloAlarmEntity? = null
 
     fun onEvent(event: SolosEvent) {
         when (event) {
@@ -48,77 +53,113 @@ class PageSoloViewModel(
                 _sortType.update { event.sortType }
             }
 
-            SolosEvent.EnterSelectView -> _inSelectView.update { true }
+            is SolosEvent.SetOn -> viewModelScope.launch {
+                val alarmScheduler = AlarmScheduler(event.context)
+                val entity = event.entity
+                val isOn = event.isOn
+                val alarmItem = AlarmItem(
+                    AlarmItem.makeCombinedID(entity.id!!, 0),
+                    entity.title,
+                    entity.time,
+                    entity.weekDays
+                )
+
+                // TODO: alarm scheduler
+//                if (!isOn) alarmScheduler.cancel(alarmItem)
+                dao.insertEntity(entity.copy(isOn = isOn))
+//                if (isOn) alarmScheduler.schedule(alarmItem)
+            }
+
+            // SelectView options
+            /////////////////////
+            SolosEvent.EnterSelectView -> {
+                onEvent(SolosEvent.DismissEditDialog)
+                _selectedAlarms.update { SoloAlarms() }
+                _inSelectView.update { true }
+            }
 
             SolosEvent.ExitSelectView -> {
                 _inSelectView.update { false }
-                _selectedAlarms.update { SoloAlarms() }
+                _selectedAlarms.update { null }
             }
 
             is SolosEvent.SelectEntity -> _selectedAlarms.update {
-                it.add(event.alarm)
+                it?.add(event.entity) ?: throw IllegalAccessError()
                 it
             }
 
             is SolosEvent.UnselectEntity -> _selectedAlarms.update {
-                it.remove(event.alarm)
+                it?.remove(event.entity) ?: throw IllegalAccessError()
                 it
             }
 
             is SolosEvent.DeleteEntities -> {
+                val selectedAlarms = _selectedAlarms.value ?: throw IllegalAccessError()
                 val alarmScheduler = AlarmScheduler(event.context)
-                for (entity in _selectedAlarms.value) {
-                    alarmScheduler.cancel(
-                        AlarmItem(
-                            AlarmItem.makeCombinedID(entity.id!!, 0.toShort()),
-                            entity.title,
-                            entity.time,
-                            entity.weekDays
-                        )
-                    )
-                    viewModelScope.launch {
-                        dao.deleteEntity(entity)
-                    }
+
+                for (entity in selectedAlarms) {
+                    // TODO: alarm scheduler
+//                    alarmScheduler.cancel(
+//                        AlarmItem(
+//                            AlarmItem.makeCombinedID(entity.id!!, 0.toShort()),
+//                            entity.title,
+//                            entity.time,
+//                            entity.weekDays
+//                        )
+//                    )
+                    viewModelScope.launch { dao.deleteEntity(entity) }
                 }
                 onEvent(SolosEvent.ExitSelectView)
             }
 
-            is SolosEvent.ShowEditingDialog -> {
-                editingEntity =
-                    event.alarm ?: SoloAlarmEntity(LocalTime.now(), WeekDays(), "", true)
-                _inDialog.update { true }
+            // EditDialog options
+            /////////////////////
+            is SolosEvent.EnterEditDialog -> {
+                onEvent(SolosEvent.ExitSelectView)
+                _editingAlarm.update { event.entity ?: SoloAlarmEntity() }
+                _inEditingDialog.update { true }
             }
 
-            is SolosEvent.HideEditingDialog -> {
-                _inDialog.update { false }
-                editingEntity = null
+            SolosEvent.DismissEditDialog -> {
+                _inEditingDialog.update { false }
+                _editingAlarm.update { null }
             }
 
-            is SolosEvent.SetOn -> editingEntity = editingEntity?.copy(isOn = event.isOn)
+            is SolosEvent.ConfirmChanges -> {
+                val oldAlarm = _editingAlarm.value ?: throw IllegalAccessError()
+                var updatedAlarm = event.updatedEntity
+                val isNewAlarm = updatedAlarm.id == null
+                val alarmScheduler = AlarmScheduler(event.context)
 
-            is SolosEvent.SetTime -> editingEntity = editingEntity?.copy(time = event.time)
+                onEvent(SolosEvent.DismissEditDialog)
 
-            is SolosEvent.SetTitle -> editingEntity = editingEntity?.copy(title = event.title)
-
-            is SolosEvent.SetWeekDays -> editingEntity =
-                editingEntity?.copy(weekDays = event.weekDays)
-
-            is SolosEvent.SaveEntity -> {
                 viewModelScope.launch {
-                    val entity = editingEntity?.copy()!!
-                    dao.insertEntity(entity)
+                    // cancel old version -> replace with updated -> schedule updated
+                    // TODO: alarm scheduler
+//                    if (!isNewAlarm) alarmScheduler.cancel(
+//                        AlarmItem(
+//                            AlarmItem.makeCombinedID(oldAlarm.id!!, 0),
+//                            oldAlarm.title,
+//                            oldAlarm.time,
+//                            oldAlarm.weekDays
+//                        )
+//                    )
 
-                    _alarms.value.find { item ->
-                        item.copy(id = entity.id) == entity
-                    }?.let {
-                        AlarmScheduler(event.context).schedule(
-                            AlarmItem(
-                                AlarmItem.makeCombinedID(it.id!!, 0), it.title, it.time, it.weekDays
-                            )
-                        )
-                    }
+                    dao.insertEntity(updatedAlarm)
+
+//                if (isNewAlarm)  // then find generated id
+//                    updatedAlarm = _alarms.value.find { item ->
+//                        item.copy(id = null) == updatedAlarm
+//                    } ?: TODO()
+//                alarmScheduler.schedule(
+//                    AlarmItem(
+//                        AlarmItem.makeCombinedID(updatedAlarm.id!!, 0),
+//                        updatedAlarm.title,
+//                        updatedAlarm.time,
+//                        updatedAlarm.weekDays
+//                    )
+//                )
                 }
-                onEvent(SolosEvent.HideEditingDialog)
             }
         }
     }
