@@ -13,7 +13,7 @@ class Converter {
     fun fromWeekDays(weekDays: WeekDays): Int {
         var result = 0
         for (weekDay in weekDays) {
-            result += 1 shl (7 - weekDay.ordinal)
+            result += 1 shl (6 - weekDay.ordinal)
         }
         return result
     }
@@ -39,19 +39,23 @@ class Converter {
     }
 }
 
-fun fromWeekDaysToString(weekDays: WeekDays): String {
-    return if (weekDays.size == 0) "Однократно"
-    else weekDays.let {
-        it.joinToString(" ") { day ->
-            when (day) {
-                DayOfWeek.MONDAY -> "пн"
-                DayOfWeek.TUESDAY -> "вт"
-                DayOfWeek.WEDNESDAY -> "ср"
-                DayOfWeek.THURSDAY -> "чт"
-                DayOfWeek.FRIDAY -> "пт"
-                DayOfWeek.SATURDAY -> "сб"
-                DayOfWeek.SUNDAY -> "вс"
-            }
+fun WeekDays.toStringEnumeration(): String {
+    return if (this.size == 0) "Однократно"
+    else this.let {
+        it.joinToString(" ") { dayOfWeek ->
+            dayOfWeek.toRussianAbbrev()
         }
+    }
+}
+
+fun DayOfWeek.toRussianAbbrev(): String {
+    return when (this) {
+        DayOfWeek.MONDAY -> "пн"
+        DayOfWeek.TUESDAY -> "вт"
+        DayOfWeek.WEDNESDAY -> "ср"
+        DayOfWeek.THURSDAY -> "чт"
+        DayOfWeek.FRIDAY -> "пт"
+        DayOfWeek.SATURDAY -> "сб"
+        DayOfWeek.SUNDAY -> "вс"
     }
 }
