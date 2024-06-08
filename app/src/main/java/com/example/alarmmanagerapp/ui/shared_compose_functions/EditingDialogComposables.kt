@@ -4,7 +4,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -22,7 +21,6 @@ import com.example.alarmmanagerapp.ui.AppColor
 import com.example.alarmmanagerapp.util.WeekDays
 import com.example.alarmmanagerapp.util.toRussianAbbrev
 import java.time.DayOfWeek
-import java.time.LocalTime
 
 @Composable
 fun WeekDaysCheckField(
@@ -63,18 +61,4 @@ fun WeekDaysCheckField(
                 }
         }
     }
-}
-
-@Composable
-fun CircularTimeLists(
-    initialTime: LocalTime, onHourChanged: (Int) -> Unit, onMinuteChanged: (Int) -> Unit
-) = Row(
-    horizontalArrangement = Arrangement.SpaceEvenly
-) {
-    CircularList(
-        initialItem = initialTime.hour, onItemSelected = { hour -> onHourChanged(hour) }, 23
-    )
-    CircularList(
-        initialItem = initialTime.minute, onItemSelected = { minute -> onMinuteChanged(minute) }, 59
-    )
 }

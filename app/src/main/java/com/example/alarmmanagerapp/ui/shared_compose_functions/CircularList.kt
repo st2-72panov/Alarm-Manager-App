@@ -5,7 +5,9 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -27,6 +29,23 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.alarmmanagerapp.ui.AppColor
+import java.time.LocalTime
+
+@Composable
+fun CircularTimeLists(
+    initialTime: LocalTime, onHourChanged: (Int) -> Unit, onMinuteChanged: (Int) -> Unit
+) = Row(
+    horizontalArrangement = Arrangement.End,
+    verticalAlignment = Alignment.CenterVertically
+) {
+    CircularList(
+        initialItem = initialTime.hour, onItemSelected = { hour -> onHourChanged(hour) }, 23
+    )
+
+    CircularList(
+        initialItem = initialTime.minute, onItemSelected = { minute -> onMinuteChanged(minute) }, 59
+    )
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
