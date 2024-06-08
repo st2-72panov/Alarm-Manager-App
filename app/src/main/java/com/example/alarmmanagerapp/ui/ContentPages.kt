@@ -83,7 +83,8 @@ fun ContentPages(
                     if (selectedTabIndex == 0) "Простые будильники"
                     else "Группы будильников"
                 )
-            }, actions = {
+            },
+            actions = {
                 if (pagerState.currentPage == 0) pageSoloViewModel.also {
                     val pageSoloState by it.pageState.collectAsState()
                     SortButtonWithPopup(
@@ -91,12 +92,11 @@ fun ContentPages(
                         { it.onEvent(SolosEvent.SortDB(SortType.Time)) },
                         { it.onEvent(SolosEvent.SortDB(SortType.IsOn)) }
                     )
-                } else pageGroupsViewModel.also {
-                    TODO("not implemented because the ")
-                }
+                } // TODO: sort button in Page Groups
 
                 SettingsButtonWithPopup { navigateToSettings() }
-            }, colors = TopAppBarDefaults.topAppBarColors(
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = AppColor.background, titleContentColor = AppColor.light
             )
         )
