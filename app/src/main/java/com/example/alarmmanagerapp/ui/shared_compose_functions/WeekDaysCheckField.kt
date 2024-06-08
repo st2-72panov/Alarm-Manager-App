@@ -22,7 +22,6 @@ import com.example.alarmmanagerapp.ui.AppColor
 import com.example.alarmmanagerapp.util.WeekDays
 import com.example.alarmmanagerapp.util.toRussianAbbrev
 import java.time.DayOfWeek
-import java.time.LocalTime
 
 @Composable
 fun WeekDaysCheckField(
@@ -65,18 +64,4 @@ fun WeekDaysCheckField(
                 }
         }
     }
-}
-
-@Composable
-fun CircularTimeLists(
-    initialTime: LocalTime, onHourChanged: (Int) -> Unit, onMinuteChanged: (Int) -> Unit
-) = Row(
-    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
-) {
-    CircularList(
-        initialItem = initialTime.hour, onItemSelected = { hour -> onHourChanged(hour) }, 23
-    )
-    CircularList(
-        initialItem = initialTime.minute, onItemSelected = { minute -> onMinuteChanged(minute) }, 59
-    )
 }
