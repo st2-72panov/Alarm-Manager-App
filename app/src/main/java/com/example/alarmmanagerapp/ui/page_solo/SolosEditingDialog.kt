@@ -3,13 +3,13 @@ package com.example.alarmmanagerapp.ui.page_solo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,7 +44,7 @@ fun SolosEditingDialog(
     val interactionSource = remember { MutableInteractionSource() }
     val focusManager = LocalFocusManager.current
 
-    Card(  // TODO: colors
+    Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(AppColor.dimmest2),
         modifier = Modifier.clickable (
@@ -54,59 +54,70 @@ fun SolosEditingDialog(
             focusManager.clearFocus()
         }
     ) {
+
         Column(
             Modifier.padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
-        ) {  // TODO: space between
-            Spacer(Modifier.height(10.dp))
+        ) {
             TopBarTitle(
                 if (editingEntity.id == null) "Новый будильник"
                 else "Изменение будильника",
-                Modifier.fillMaxWidth()
+                Modifier.fillMaxWidth().padding(0.dp, 10.dp, 0.dp, 15.dp)
             )
 
-            Box(
-                Modifier.height(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularTimeLists(initialTime = editingEntity.time, onHourChanged = { hour ->
-                    editingEntity = editingEntity.copy(time = editingEntity.time.withHour(hour))
-                }, onMinuteChanged = { minute ->
-                    editingEntity = editingEntity.copy(time = editingEntity.time.withMinute(minute))
-                })
-            }
-
-            WeekDaysCheckField(
-                editingEntity.weekDays
-            ) { weekDays ->
-                editingEntity = editingEntity.copy(weekDays = weekDays)
-            }
-
-            Spacer(Modifier.height(5.dp))
-
-            OutlinedTextField(
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = AppColor.dimmest,
-                    unfocusedContainerColor = AppColor.dimmest,
-                    focusedTextColor = AppColor.light,
-                    unfocusedTextColor = AppColor.dim,
-                    cursorColor = AppColor.contrast,
-                    focusedBorderColor = AppColor.contrast
-                ),
-                maxLines = 3,
-                value = editingEntity.title,
-                onValueChange = { editingEntity = editingEntity.copy(title = it) },
-                placeholder = { Text("Title") }
-            )
-
+            // Content
             Row(
-                Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // week days + text field
+                Column(
+                    Modifier.width(50.dp * 3),
+                ){
+                    WeekDaysCheckField(
+                        editingEntity.weekDays
+                    ) { weekDays ->
+                        editingEntity = editingEntity.copy(weekDays = weekDays)
+                    }
+
+                    Spacer(Modifier.height(7.dp))
+
+                    OutlinedTextField(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = AppColor.dimmest,
+                            unfocusedContainerColor = AppColor.dimmest,
+                            focusedTextColor = AppColor.light,
+                            unfocusedTextColor = AppColor.dim,
+                            cursorColor = AppColor.contrast,
+                            focusedBorderColor = AppColor.contrast
+                        ),
+                        maxLines = 3,
+                        value = editingEntity.title,
+                        onValueChange = { editingEntity = editingEntity.copy(title = it) },
+                        placeholder = { Text("Title") }
+                    )
+                }
+
+                Spacer(Modifier.width(5.dp))
+
+                CircularTimeLists(
+                    initialTime = editingEntity.time,
+                    onHourChanged = { hour ->
+                        editingEntity =
+                            editingEntity.copy(time = editingEntity.time.withHour(hour))
+                    },
+                    onMinuteChanged = { minute ->
+                        editingEntity =
+                            editingEntity.copy(time = editingEntity.time.withMinute(minute))
+                    }
+                )
+            }
+
+            // Buttons
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 TextButton(onClick = { onCancel() }) {
                     Text("Отмена", color = AppColor.light)
                 }
-
                 TextButton(onClick = { onSave(editingEntity) }) {
                     Text("Сохранить", color = AppColor.light)
                 }

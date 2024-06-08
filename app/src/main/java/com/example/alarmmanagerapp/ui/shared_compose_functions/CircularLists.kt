@@ -33,9 +33,12 @@ import java.time.LocalTime
 
 @Composable
 fun CircularTimeLists(
-    initialTime: LocalTime, onHourChanged: (Int) -> Unit, onMinuteChanged: (Int) -> Unit
+    initialTime: LocalTime,
+    onHourChanged: (Int) -> Unit,
+    onMinuteChanged: (Int) -> Unit
 ) = Row(
-    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceEvenly
 ) {
     CircularList(
         initialItem = initialTime.hour, onItemSelected = { hour -> onHourChanged(hour) }, 23
