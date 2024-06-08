@@ -1,4 +1,5 @@
 package com.example.alarmmanagerapp.util
+
 import androidx.room.TypeConverter
 import com.example.alarmmanagerapp.databases.solo.SoloAlarmEntity
 import java.time.DayOfWeek
@@ -17,6 +18,7 @@ class Converter {
         }
         return result
     }
+
     @TypeConverter
     fun toWeekDays(weekDaysInt: Int): WeekDays {
         var weekDays = weekDaysInt
@@ -33,6 +35,7 @@ class Converter {
     fun fromTime(time: LocalTime): Int {
         return time.toSecondOfDay()
     }
+
     @TypeConverter
     fun toTime(time: Int): LocalTime {
         return LocalTime.ofSecondOfDay(time.toLong())
@@ -40,10 +43,18 @@ class Converter {
 }
 
 fun WeekDays.toStringEnumeration(): String {
-    return if (this.size == 0) "Однократно"
-    else this.let {
-        it.joinToString(" ") { dayOfWeek ->
-            dayOfWeek.toRussianAbbrev()
+    return when (this.size) {
+        0 -> "Однократно"
+        7 -> "Ежедневно"
+        else -> this.let {
+            val result = it.joinToString(" ") { dayOfWeek ->
+                dayOfWeek.toRussianAbbrev()
+            }
+            when (result) {
+                "пн вт ср чт пт" -> "По будням"
+                "сб вс" -> "По выходным"
+                else -> result
+            }
         }
     }
 }
