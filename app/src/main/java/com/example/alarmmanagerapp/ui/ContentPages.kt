@@ -149,7 +149,7 @@ fun ContentPages(
 }
 
 @Composable
-fun AnimatedIconButtonWithText(
+private fun AnimatedIconButtonWithText(
     icon: ImageVector, text: String, isSelected: Boolean, onClick: () -> Unit
 ) {
     val buttonSize = 70.dp
@@ -184,7 +184,7 @@ fun AnimatedIconButtonWithText(
 }
 
 @Composable
-fun SettingsButtonWithPopup(
+private fun SettingsButtonWithPopup(
     navigateToSettings: () -> Unit
 ) {
     var isExpanded by remember {
@@ -231,7 +231,7 @@ fun SettingsButtonWithPopup(
 
 
 @Composable
-fun SortButtonWithPopup(
+private fun SortButtonWithPopup(
     sortType: SortType,
     onSortByTimeChose: () -> Unit,
     onSortByIsOnChose: () -> Unit
@@ -261,7 +261,7 @@ fun SortButtonWithPopup(
                 onSortByTimeChose()
             }
 
-            MyDropdownMenuItem(sortType == SortType.IsOn, "С рабочих") {
+            MyDropdownMenuItem(sortType == SortType.IsOn, "С выключенных") {
                 isExpanded = false
                 onSortByIsOnChose()
             }
