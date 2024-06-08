@@ -1,4 +1,4 @@
-package com.example.alarmmanagerapp.ui.shared_functions
+package com.example.alarmmanagerapp.ui.shared_compose_functions
 
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -10,7 +10,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import com.example.alarmmanagerapp.ui.AppColor
 
 @Composable
-fun AppSwitch(
+fun CuteSwitch(
     haptic: HapticFeedback,
     isOn: Boolean,
     onCheckedChangeEvent: () -> Unit

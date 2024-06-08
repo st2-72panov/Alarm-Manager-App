@@ -1,4 +1,4 @@
-package com.example.alarmmanagerapp.ui.shared_functions
+package com.example.alarmmanagerapp.ui.shared_compose_functions
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,9 +20,7 @@ import com.example.alarmmanagerapp.ui.AppColor
 
 @Composable
 fun DeletionDialog(
-    onDismissRequest: () -> Unit,
-    onLeaveRequest: () -> Unit,
-    onConfirmation: () -> Unit
+    onDismissRequest: () -> Unit, onLeaveRequest: () -> Unit, onConfirmation: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
@@ -47,14 +45,12 @@ fun DeletionDialog(
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     TextButton(
-                        onClick = { onLeaveRequest() },
-                        modifier = Modifier.padding(8.dp)
+                        onClick = { onLeaveRequest() }, modifier = Modifier.padding(8.dp)
                     ) {
                         Text("Выйти", color = AppColor.lightest)
                     }
                     TextButton(
-                        onClick = { onConfirmation() },
-                        modifier = Modifier.padding(8.dp)
+                        onClick = { onConfirmation() }, modifier = Modifier.padding(8.dp)
                     ) {
                         Text("Удалить", color = AppColor.lightest)
                     }

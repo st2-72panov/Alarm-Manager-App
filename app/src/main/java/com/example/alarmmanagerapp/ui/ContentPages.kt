@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,11 +49,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import com.example.alarmmanagerapp.R
 import com.example.alarmmanagerapp.databases.groups.PageGroupsViewModel
 import com.example.alarmmanagerapp.databases.solo.PageSoloViewModel
+import com.example.alarmmanagerapp.databases.solo.SolosEvent
+import com.example.alarmmanagerapp.databases.solo.SortType
 import com.example.alarmmanagerapp.ui.page_solo.PageSolo
-import com.example.alarmmanagerapp.ui.shared_functions.TopBarTitle
+import com.example.alarmmanagerapp.ui.shared_compose_functions.TopBarTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -65,73 +69,38 @@ fun ContentPages(
 ) = Column(
     Modifier.fillMaxSize()
 ) {
+
     var selectedTabIndex by remember {
         mutableIntStateOf(0)
     }
     val pagerState = rememberPagerState { 2 }
     val barSize = 70.dp
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    TopBarTitle(
-                        if (selectedTabIndex == 0) "Простые будильники"
-                        else "Группы будильников"
-                    )
-                },
-                actions = {
-                    var isExpanded by remember {
-                        mutableStateOf(false)
-                    }
-
-                    val haptic = LocalHapticFeedback.current
-                    IconButton(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            isExpanded = true
-                        }
-                    ) {
-                        Icon(
-                            ImageVector.vectorResource(R.drawable.baseline_more_vert_24),
-                            null,
-                            tint = AppColor.dim
-                        )
-                    }
-
-                    MaterialTheme(
-                        shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))
-                    ) {
-                        DropdownMenu(
-                            modifier = Modifier.background(AppColor.dimmest2),
-                            expanded = isExpanded,
-                            onDismissRequest = { isExpanded = false },
-                            offset = DpOffset((-15).dp, (-5).dp)
-                        ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        "Настройки",
-                                        modifier = Modifier.fillMaxSize(),
-                                        textAlign = TextAlign.Center,
-                                        fontSize = 16.sp
-                                    )
-                                },
-                                onClick = {
-                                    navigateToSettings()
-                                    isExpanded = false
-                                },
-                                colors = MenuDefaults.itemColors(AppColor.light)
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AppColor.background,
-                    titleContentColor = AppColor.light
+    Scaffold(topBar = {
+        CenterAlignedTopAppBar(
+            title = {
+                TopBarTitle(
+                    if (selectedTabIndex == 0) "Простые будильники"
+                    else "Группы будильников"
                 )
+            }, actions = {
+                if (pagerState.currentPage == 0) pageSoloViewModel.also {
+                    val pageSoloState by it.pageState.collectAsState()
+                    SortButtonWithPopup(
+                        pageSoloState.sortType,
+                        { it.onEvent(SolosEvent.SortDB(SortType.Time)) },
+                        { it.onEvent(SolosEvent.SortDB(SortType.IsOn)) }
+                    )
+                } else pageGroupsViewModel.also {
+                    TODO("not implemented because the ")
+                }
+
+                SettingsButtonWithPopup { navigateToSettings() }
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = AppColor.background, titleContentColor = AppColor.light
             )
-        },
+        )
+    },
 
         bottomBar = {
             Row(
@@ -156,8 +125,7 @@ fun ContentPages(
                     selectedTabIndex == 1
                 ) { selectedTabIndex = 1 }
             }
-        }
-    ) { contentPadding ->
+        }) { contentPadding ->
 
         Surface(
             modifier = Modifier
@@ -180,28 +148,23 @@ fun ContentPages(
 
 @Composable
 fun AnimatedIconButtonWithText(
-    icon: ImageVector,
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
+    icon: ImageVector, text: String, isSelected: Boolean, onClick: () -> Unit
 ) {
     val buttonSize = 70.dp
     val animationDuration = 200
     val targetColor by animateColorAsState(
-        targetValue = if (isSelected) AppColor.light else AppColor.dim,
-        animationSpec = tween(durationMillis = animationDuration), ""
+        targetValue = getLightOrDim(isSelected),
+        animationSpec = tween(durationMillis = animationDuration),
+        ""
     )
     val coroutineScope = rememberCoroutineScope()
 
-    IconButton(
-        modifier = Modifier.requiredSize(buttonSize),
-        onClick = {
-            coroutineScope.launch {
-                delay(animationDuration.toLong())
-                onClick()
-            }
+    IconButton(modifier = Modifier.requiredSize(buttonSize), onClick = {
+        coroutineScope.launch {
+            delay(animationDuration.toLong())
+            onClick()
         }
-    ) {
+    }) {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -217,3 +180,107 @@ fun AnimatedIconButtonWithText(
         }
     }
 }
+
+@Composable
+fun SettingsButtonWithPopup(
+    navigateToSettings: () -> Unit
+) {
+    var isExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    val haptic = LocalHapticFeedback.current
+    IconButton(onClick = {
+        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        isExpanded = true
+    }) {
+        Icon(
+            ImageVector.vectorResource(R.drawable.baseline_more_vert_24),
+            null,
+            tint = AppColor.dim
+        )
+    }
+
+    MaterialTheme(
+        shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))
+    ) {
+        DropdownMenu(
+            modifier = Modifier.background(AppColor.dimmest2),
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false },
+            offset = DpOffset((-15).dp, (-5).dp),
+            properties = PopupProperties()
+        ) {
+            DropdownMenuItem(text = {
+                Text(
+                    "Настройки",
+                    modifier = Modifier.fillMaxSize(),
+                    textAlign = TextAlign.Center,
+                    fontSize = 16.sp
+                )
+            }, onClick = {
+                isExpanded = false
+                navigateToSettings()
+            }, colors = MenuDefaults.itemColors(AppColor.light)
+            )
+        }
+    }
+}
+
+
+@Composable
+fun SortButtonWithPopup(
+    sortType: SortType,
+    onSortByTimeChose: () -> Unit,
+    onSortByIsOnChose: () -> Unit
+) {
+    var isExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    IconButton(onClick = { isExpanded = true }) {
+        Icon(
+            ImageVector.vectorResource(R.drawable.round_sort_24),
+            null,
+            tint = AppColor.dim
+        )
+    }
+
+    MaterialTheme(
+        shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))
+    ) {
+        DropdownMenu(
+            modifier = Modifier.background(AppColor.dimmest2),
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false },
+        ) {
+            MyDropdownMenuItem( sortType == SortType.Time,"По времени") {
+                isExpanded = false
+                onSortByTimeChose()
+            }
+
+            MyDropdownMenuItem(sortType == SortType.IsOn, "С рабочих") {
+                isExpanded = false
+                onSortByIsOnChose()
+            }
+        }
+    }
+}
+
+@Composable
+private fun MyDropdownMenuItem(
+    isChosen: Boolean, name: String, onClick: () -> Unit
+) = DropdownMenuItem(
+    text = {
+        Text(
+            name,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Left,
+            fontSize = 16.sp
+        )
+    },
+    onClick = { onClick() },
+    colors = MenuDefaults.itemColors(
+        getLightOrDim(isChosen)
+    )
+)

@@ -13,3 +13,7 @@ object AppColor {
     val dimmest2 = Color(0xFF222222)  // for popups
     val addButton = Color(0xFF1F1F1F)
 }
+
+fun getLightOrDim(flag: Boolean): Color {
+    return if (flag) AppColor.light else AppColor.dim
+}
