@@ -1,6 +1,7 @@
 package com.example.alarmmanagerapp.ui.page_solo
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -41,21 +42,24 @@ fun PageSolo(
         mutableStateOf(false)
     }
 
-    Scaffold(floatingActionButton = {
-        FloatingActionButton(
-            onClick = {
-                if (pageState.inSelectView) inConfirmDeletionDialog = true
-                else onEvent(SolosEvent.EnterEditDialog(null))
-            }, shape = CircleShape, containerColor = AppColor.addButton
-        ) {
-            Icon(
-                ImageVector.vectorResource(
-                    if (pageState.inSelectView) R.drawable.round_arrow_forward_24
-                    else R.drawable.round_add_36
-                ), null, tint = AppColor.contrast
-            )
-        }
-    }, contentColor = AppColor.background) { _ ->
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    if (pageState.inSelectView) inConfirmDeletionDialog = true
+                    else onEvent(SolosEvent.EnterEditDialog(null))
+                }, shape = CircleShape, containerColor = AppColor.addButton
+            ) {
+                Icon(
+                    ImageVector.vectorResource(
+                        if (pageState.inSelectView) R.drawable.round_arrow_forward_24
+                        else R.drawable.round_add_36
+                    ), null, tint = AppColor.contrast
+                )
+            }
+        },
+        contentColor = AppColor.background
+    ) { _ ->
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = AppColor.background
@@ -68,23 +72,27 @@ fun PageSolo(
             }
         }
 
-        if (inConfirmDeletionDialog) DeletionDialog(onDismissRequest = {
-            inConfirmDeletionDialog = false
-        }, onLeaveRequest = {
-            inConfirmDeletionDialog = false
-            onEvent(SolosEvent.ExitSelectView)
-        }, onConfirmation = {
-            inConfirmDeletionDialog = false
-            onEvent(SolosEvent.DeleteEntities(context))
-        })
-
-        if (pageState.inEditingDialog) SolosEditingDialog(alarmEntity = pageState.editingAlarm!!,
-            onSave = {
-                onEvent(SolosEvent.ConfirmChanges(context, it))
-            },
-            onCancel = {
-                onEvent(SolosEvent.DismissEditDialog)
+        if (inConfirmDeletionDialog)
+            DeletionDialog(onDismissRequest = {
+                inConfirmDeletionDialog = false
+            }, onLeaveRequest = {
+                inConfirmDeletionDialog = false
+                onEvent(SolosEvent.ExitSelectView)
+            }, onConfirmation = {
+                inConfirmDeletionDialog = false
+                onEvent(SolosEvent.DeleteEntities(context))
             })
+
+        if (pageState.inEditingDialog)
+            SolosEditingDialog(alarmEntity = pageState.editingAlarm!!,
+                onSave = {
+                    onEvent(SolosEvent.ConfirmChanges(context, it))
+                },
+                onCancel = {
+                    onEvent(SolosEvent.DismissEditDialog)
+                })
+
+        BackHandler(enabled = pageState.inSelectView) { inConfirmDeletionDialog = true }
     }
 }
 

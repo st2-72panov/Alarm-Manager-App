@@ -76,31 +76,32 @@ fun ContentPages(
     val pagerState = rememberPagerState { 2 }
     val barSize = 70.dp
 
-    Scaffold(topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-                TopBarTitle(
-                    if (selectedTabIndex == 0) "Простые будильники"
-                    else "Группы будильников"
-                )
-            },
-            actions = {
-                if (pagerState.currentPage == 0) pageSoloViewModel.also {
-                    val pageSoloState by it.pageState.collectAsState()
-                    SortButtonWithPopup(
-                        pageSoloState.sortType,
-                        { it.onEvent(SolosEvent.SortDB(SortType.Time)) },
-                        { it.onEvent(SolosEvent.SortDB(SortType.IsOn)) }
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    TopBarTitle(
+                        if (selectedTabIndex == 0) "Простые будильники"
+                        else "Группы будильников"
                     )
-                } // TODO: sort button in Page Groups
+                },
+                actions = {
+                    if (pagerState.currentPage == 0) pageSoloViewModel.also {
+                        val pageSoloState by it.pageState.collectAsState()
+                        SortButtonWithPopup(
+                            pageSoloState.sortType,
+                            { it.onEvent(SolosEvent.SortDB(SortType.Time)) },
+                            { it.onEvent(SolosEvent.SortDB(SortType.IsOn)) }
+                        )
+                    } // TODO: sort button in Page Groups
 
-                SettingsButtonWithPopup { navigateToSettings() }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = AppColor.background, titleContentColor = AppColor.light
+                    SettingsButtonWithPopup { navigateToSettings() }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = AppColor.background, titleContentColor = AppColor.light
+                )
             )
-        )
-    },
+        },
 
         bottomBar = {
             Row(
@@ -125,7 +126,8 @@ fun ContentPages(
                     selectedTabIndex == 1
                 ) { selectedTabIndex = 1 }
             }
-        }) { contentPadding ->
+        }
+    ) { contentPadding ->
 
         Surface(
             modifier = Modifier
@@ -254,7 +256,7 @@ fun SortButtonWithPopup(
             expanded = isExpanded,
             onDismissRequest = { isExpanded = false },
         ) {
-            MyDropdownMenuItem( sortType == SortType.Time,"По времени") {
+            MyDropdownMenuItem(sortType == SortType.Time, "По времени") {
                 isExpanded = false
                 onSortByTimeChose()
             }
