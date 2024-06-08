@@ -20,10 +20,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import com.example.alarmmanagerapp.R
 import com.example.alarmmanagerapp.databases.solo.PageSoloState
+import com.example.alarmmanagerapp.databases.solo.SoloAlarmEntity
 import com.example.alarmmanagerapp.databases.solo.SolosEvent
 import com.example.alarmmanagerapp.ui.AppColor
-import com.example.alarmmanagerapp.ui.shared_functions.DeletionDialog
+import com.example.alarmmanagerapp.ui.shared_compose_functions.DeletionDialog
+import com.example.alarmmanagerapp.util.WeekDays
 import kotlinx.coroutines.flow.StateFlow
+import java.time.DayOfWeek
+import java.time.LocalTime
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -33,79 +37,63 @@ fun PageSolo(
 ) {
     val context = LocalContext.current
     val pageState by pageStateFlow.collectAsState()
-    var inDeleteDialog by remember {
+    var inConfirmDeletionDialog by remember {
         mutableStateOf(false)
     }
 
-    Scaffold(
-        floatingActionButton = {
-            when (pageState.inSelectView) {
-                false -> FloatingActionButton(
-                    onClick = {
-                        onEvent(SolosEvent.ShowEditingDialog(null))
-                    },
-                    shape = CircleShape,
-                    containerColor = AppColor.addButton
-                ) {
-                    Icon(
-                        ImageVector.vectorResource(R.drawable.round_add_36),
-                        null,
-                        tint = AppColor.contrast
-                    )
-                }
-
-                else -> FloatingActionButton(
-                    onClick = {
-                        inDeleteDialog = true
-                    },
-                    shape = CircleShape,
-                    containerColor = AppColor.addButton
-                ) {
-                    Icon(
-                        ImageVector.vectorResource(R.drawable.round_arrow_forward_24),
-                        null,
-                        tint = AppColor.contrast
-                    )
-                }
-            }
+    Scaffold(floatingActionButton = {
+        FloatingActionButton(
+            onClick = {
+                if (pageState.inSelectView) inConfirmDeletionDialog = true
+                else onEvent(SolosEvent.EnterEditDialog(null))
+            }, shape = CircleShape, containerColor = AppColor.addButton
+        ) {
+            Icon(
+                ImageVector.vectorResource(
+                    if (pageState.inSelectView) R.drawable.round_arrow_forward_24
+                    else R.drawable.round_add_36
+                ), null, tint = AppColor.contrast
+            )
         }
-    ) { _ ->
+    }, contentColor = AppColor.background) { _ ->
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = AppColor.background
         ) {
-            LazyColumn {
-//                items(pageState.alarms.size) { index ->
-//                    SingleAlarmClock(pageState, onEvent, pageState.alarms[index])
-//                }
-
-//                item {
-//                    SingleAlarmClock(
-//                        pageStateFlow,
-//                        onEvent,
-//                        SoloAlarmEntity(
-//                            LocalTime.now(),
-//                            WeekDays().apply { this.add(DayOfWeek.MONDAY) },
-//                            "Hello!",
-//                            false
-//                        )
-//                    )
-//                }
+            LazyColumn(Modifier.fillMaxSize()) {
+                items(pageState.alarms.size) { index ->
+                    val alarm = pageState.alarms[index]
+                    SoloAlarmClock(pageStateFlow, onEvent, alarm, index)
+                }
             }
-
-            if (inDeleteDialog)
-                DeletionDialog(
-                    onDismissRequest = { inDeleteDialog = false },
-                    onLeaveRequest = {
-                        inDeleteDialog = false
-                        onEvent(SolosEvent.ExitSelectView)
-                    },
-                    onConfirmation = {
-                        inDeleteDialog = false
-                        onEvent(SolosEvent.DeleteEntities(context))
-                    }
-                )
         }
+
+        if (inConfirmDeletionDialog) DeletionDialog(onDismissRequest = {
+            inConfirmDeletionDialog = false
+        }, onLeaveRequest = {
+            inConfirmDeletionDialog = false
+            onEvent(SolosEvent.ExitSelectView)
+        }, onConfirmation = {
+            inConfirmDeletionDialog = false
+            onEvent(SolosEvent.DeleteEntities(context))
+        })
+
+        if (pageState.inEditingDialog) SolosEditingDialog(alarmEntity = pageState.editingAlarm!!,
+            onSave = {
+                onEvent(SolosEvent.ConfirmChanges(context, it))
+            },
+            onCancel = {
+                onEvent(SolosEvent.DismissEditDialog)
+            })
     }
 }
 
+
+private fun getTestSoloAlarmEntity(): SoloAlarmEntity {
+    return SoloAlarmEntity(
+        LocalTime.now(),
+        WeekDays().apply { this.add(DayOfWeek.MONDAY) },
+        "Hello!",
+        false
+    )
+}
