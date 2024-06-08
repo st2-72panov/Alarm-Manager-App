@@ -49,11 +49,6 @@ class PageSoloViewModel(
 
     fun onEvent(event: SolosEvent) {
         when (event) {
-            is SolosEvent.TestInsert -> {
-                viewModelScope.launch {
-                    dao.insertEntity(event.alarmEntity)
-                }
-            }
 
             is SolosEvent.SortDB -> {
                 _sortType.update { event.sortType }
