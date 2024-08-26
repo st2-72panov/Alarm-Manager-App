@@ -6,6 +6,7 @@ import com.example.alarmmanagerapp.alarm_manager.AlarmItem
 import com.example.alarmmanagerapp.alarm_manager.AlarmScheduler
 import com.example.alarmmanagerapp.util.SoloAlarms
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -49,6 +50,7 @@ class PageSoloViewModel(
 
     fun onEvent(event: SolosEvent) {
         when (event) {
+
             is SolosEvent.SortDB -> {
                 _sortType.update { event.sortType }
             }
@@ -65,9 +67,9 @@ class PageSoloViewModel(
                 )
 
                 // TODO: alarm scheduler
-//                if (!isOn) alarmScheduler.cancel(alarmItem)
+                if (!isOn) alarmScheduler.cancel(alarmItem)
                 dao.insertEntity(entity.copy(isOn = isOn))
-//                if (isOn) alarmScheduler.schedule(alarmItem)
+                if (isOn) alarmScheduler.schedule(alarmItem)
             }
 
             // SelectView options
@@ -98,15 +100,14 @@ class PageSoloViewModel(
                 val alarmScheduler = AlarmScheduler(event.context)
 
                 for (entity in selectedAlarms) {
-                    // TODO: alarm scheduler
-//                    alarmScheduler.cancel(
-//                        AlarmItem(
-//                            AlarmItem.makeCombinedID(entity.id!!, 0.toShort()),
-//                            entity.title,
-//                            entity.time,
-//                            entity.weekDays
-//                        )
-//                    )
+                    alarmScheduler.cancel(
+                        AlarmItem(
+                            AlarmItem.makeCombinedID(entity.id!!, 0.toShort()),
+                            entity.title,
+                            entity.time,
+                            entity.weekDays
+                        )
+                    )
                     viewModelScope.launch { dao.deleteEntity(entity) }
                 }
                 onEvent(SolosEvent.ExitSelectView)
@@ -136,29 +137,30 @@ class PageSoloViewModel(
                 viewModelScope.launch {
                     // cancel old version -> replace with updated -> schedule updated
                     // TODO: alarm scheduler
-//                    if (!isNewAlarm) alarmScheduler.cancel(
-//                        AlarmItem(
-//                            AlarmItem.makeCombinedID(oldAlarm.id!!, 0),
-//                            oldAlarm.title,
-//                            oldAlarm.time,
-//                            oldAlarm.weekDays
-//                        )
-//                    )
+                    if (!isNewAlarm) alarmScheduler.cancel(
+                        AlarmItem(
+                            AlarmItem.makeCombinedID(oldAlarm.id!!, 0),
+                            oldAlarm.title,
+                            oldAlarm.time,
+                            oldAlarm.weekDays
+                        )
+                    )
 
                     dao.insertEntity(updatedAlarm)
 
-//                if (isNewAlarm)  // then find generated id
-//                    updatedAlarm = _alarms.value.find { item ->
-//                        item.copy(id = null) == updatedAlarm
-//                    } ?: TODO()
-//                alarmScheduler.schedule(
-//                    AlarmItem(
-//                        AlarmItem.makeCombinedID(updatedAlarm.id!!, 0),
-//                        updatedAlarm.title,
-//                        updatedAlarm.time,
-//                        updatedAlarm.weekDays
-//                    )
-//                )
+                    delay(300)  // alarm somehow doesn't manage to be inserted without this delay
+                    if (isNewAlarm)  // then find generated id
+                        updatedAlarm = _alarms.value.find { item ->
+                            item.copy(id = null) == updatedAlarm
+                        } ?: throw InternalError("Unexpected error")
+                    alarmScheduler.schedule(
+                        AlarmItem(
+                            AlarmItem.makeCombinedID(updatedAlarm.id!!, 0),
+                            updatedAlarm.title,
+                            updatedAlarm.time,
+                            updatedAlarm.weekDays
+                        )
+                    )
                 }
             }
         }

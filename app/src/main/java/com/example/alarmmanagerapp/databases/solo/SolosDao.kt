@@ -21,7 +21,7 @@ interface SolosDao {
     fun getEntitiesByTime(): Flow<List<SoloAlarmEntity>>
 
     @Query(
-        "SELECT * FROM ${SolosDB.NAME} ORDER BY isOn DESC, time ASC, weekDays ASC, title ASC"
+        "SELECT * FROM ${SolosDB.NAME} ORDER BY isOn ASC, time ASC, weekDays ASC, title ASC"
     )
     fun getEntitiesByIsOn(): Flow<List<SoloAlarmEntity>>
 }
