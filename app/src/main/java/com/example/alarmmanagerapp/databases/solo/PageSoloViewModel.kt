@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.alarmmanagerapp.alarm_manager.AlarmItem
 import com.example.alarmmanagerapp.alarm_manager.AlarmScheduler
+import com.example.alarmmanagerapp.alarm_manager.ID
 import com.example.alarmmanagerapp.util.SoloAlarms
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -19,7 +20,7 @@ import kotlinx.coroutines.launch
 class PageSoloViewModel(
     private val dao: SolosDao
 ) : ViewModel() {
-
+    
     private val _sortType = MutableStateFlow(SortType.Time)
     private val _inSelectView = MutableStateFlow(false)
     private val _inEditingDialog = MutableStateFlow(false)
@@ -60,13 +61,12 @@ class PageSoloViewModel(
                 val entity = event.entity
                 val isOn = event.isOn
                 val alarmItem = AlarmItem(
-                    AlarmItem.makeCombinedID(entity.id!!, 0),
+                    AlarmItem.makeCombinedID(entity.id!!, GROUP_ID),
                     entity.title,
                     entity.time,
                     entity.weekDays
                 )
 
-                // TODO: alarm scheduler
                 if (!isOn) alarmScheduler.cancel(alarmItem)
                 dao.insertEntity(entity.copy(isOn = isOn))
                 if (isOn) alarmScheduler.schedule(alarmItem)
@@ -102,7 +102,7 @@ class PageSoloViewModel(
                 for (entity in selectedAlarms) {
                     alarmScheduler.cancel(
                         AlarmItem(
-                            AlarmItem.makeCombinedID(entity.id!!, 0.toShort()),
+                            AlarmItem.makeCombinedID(entity.id!!, GROUP_ID),
                             entity.title,
                             entity.time,
                             entity.weekDays
@@ -136,10 +136,9 @@ class PageSoloViewModel(
 
                 viewModelScope.launch {
                     // cancel old version -> replace with updated -> schedule updated
-                    // TODO: alarm scheduler
                     if (!isNewAlarm) alarmScheduler.cancel(
                         AlarmItem(
-                            AlarmItem.makeCombinedID(oldAlarm.id!!, 0),
+                            AlarmItem.makeCombinedID(oldAlarm.id!!, GROUP_ID),
                             oldAlarm.title,
                             oldAlarm.time,
                             oldAlarm.weekDays
@@ -155,7 +154,7 @@ class PageSoloViewModel(
                         } ?: throw InternalError("Unexpected error")
                     alarmScheduler.schedule(
                         AlarmItem(
-                            AlarmItem.makeCombinedID(updatedAlarm.id!!, 0),
+                            AlarmItem.makeCombinedID(updatedAlarm.id!!, GROUP_ID),
                             updatedAlarm.title,
                             updatedAlarm.time,
                             updatedAlarm.weekDays
@@ -170,5 +169,9 @@ class PageSoloViewModel(
         return _alarms.value.find { item ->
             item.id == id
         }?.copy() ?: throw NoSuchElementException("There is no SoloAlarmEntity with such id")
+    }
+    
+    companion object {
+        const val GROUP_ID: ID = 0
     }
 }

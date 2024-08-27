@@ -5,6 +5,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.example.alarmmanagerapp.util.Converter.Companion.toInt
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -13,12 +14,6 @@ class AlarmScheduler(
     private val context: Context
 ) {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
-
-    fun schedule(combinedID: CombinedID) {
-        // retrieve AlarmItem via ids from DB
-        TODO()
-        // schedule(item)
-    }
 
     @SuppressLint("ScheduleExactAlarm")
     fun schedule(item: AlarmItem) {
@@ -67,6 +62,8 @@ class AlarmScheduler(
         val broadcastIntent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("combinedID", item.combinedID)
             putExtra("title", item.title)
+            putExtra("timeSeconds", item.time.toSecondOfDay())
+            putExtra("weekDays", item.weekDays.toInt())
         }
 
         alarmManager.setAlarmClock(
