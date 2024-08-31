@@ -15,6 +15,9 @@ interface SolosDao {
     @Delete
     suspend fun deleteEntity(soloAlarmEntity: SoloAlarmEntity)
 
+    @Query("DELETE FROM ${SolosDB.NAME} WHERE id = :id")
+    suspend fun deleteEntity(id: Short)
+
     @Query(
         "SELECT * FROM ${SolosDB.NAME} ORDER BY time ASC, weekDays ASC, title ASC, isOn DESC"
     )
