@@ -62,7 +62,7 @@ class AlarmScheduler(
         val broadcastIntent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("combinedID", item.combinedID)
             putExtra("title", item.title)
-            putExtra("timeSeconds", item.time.toSecondOfDay())
+            putExtra("time", item.time.toSecondOfDay())
             putExtra("weekDays", item.weekDays.toInt())
         }
 

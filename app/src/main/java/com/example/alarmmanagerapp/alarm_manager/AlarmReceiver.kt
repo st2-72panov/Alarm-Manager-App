@@ -18,9 +18,10 @@ class AlarmReceiver: BroadcastReceiver() {
             val combinedID = intent.getIntExtra("combinedID", -1)
             val time = LocalTime.ofSecondOfDay(intent.getIntExtra("time", -1).toLong())
             val weekDays = getWeekDays(intent.getIntExtra("weekDays", -1))
-            AlarmScheduler(context!!).schedule(
-                AlarmItem(combinedID, title, time, weekDays)
-            )
+            if (!weekDays.isEmpty())
+                AlarmScheduler(context!!).schedule(
+                    AlarmItem(combinedID, title, time, weekDays)
+                )
         }
     }
 }

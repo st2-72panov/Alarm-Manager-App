@@ -39,7 +39,7 @@ import com.example.alarmmanagerapp.ui.AppColor
 import com.example.alarmmanagerapp.ui.getLightOrDim
 import com.example.alarmmanagerapp.ui.shared_compose_functions.CuteSwitch
 import com.example.alarmmanagerapp.ui.shared_compose_functions.RoundCheckIcon
-import com.example.alarmmanagerapp.util.toStringEnumeration
+import com.example.alarmmanagerapp.util.Converter.Companion.toStringEnumeration
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable

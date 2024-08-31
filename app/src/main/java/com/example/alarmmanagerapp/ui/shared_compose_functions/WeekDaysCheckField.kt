@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.alarmmanagerapp.ui.AppColor
 import com.example.alarmmanagerapp.util.WeekDays
-import com.example.alarmmanagerapp.util.toRussianAbbrev
+import com.example.alarmmanagerapp.util.Converter.Companion.toRussianAbbrev
 import java.time.DayOfWeek
 
 @Composable
