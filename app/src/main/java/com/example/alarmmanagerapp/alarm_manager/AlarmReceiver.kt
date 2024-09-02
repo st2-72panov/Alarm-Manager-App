@@ -1,28 +1,39 @@
 package com.example.alarmmanagerapp.alarm_manager
+
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.room.Room
+import com.example.alarmmanagerapp.AlarmService
 import com.example.alarmmanagerapp.databases.solo.PageSoloViewModel
 import com.example.alarmmanagerapp.databases.solo.SolosDB
 import com.example.alarmmanagerapp.util.Converter.Companion.getWeekDays
+import com.example.alarmmanagerapp.util.Converter.Companion.toStringEnumeration
 import kotlinx.coroutines.runBlocking
 import java.time.LocalTime
 
-class AlarmReceiver: BroadcastReceiver() {
+class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         intent ?: return
+        context ?: return
 
         val title = intent.getStringExtra("title")
-        // TODO: trigger the alarm
+        val weekDays = getWeekDays(intent.getIntExtra("weekDays", -1))
+
+        val alarmServiceIntent = Intent(context, AlarmService::class.java).also {
+            it.setAction(AlarmService.Companion.Action.Start.name)
+            it.putExtra("title", title)
+            it.putExtra("weekDays", weekDays.toStringEnumeration())
+        }
+        context.startService(alarmServiceIntent)
 
         runBlocking {
             val combinedID = intent.getIntExtra("combinedID", -1)
             val time = LocalTime.ofSecondOfDay(intent.getIntExtra("time", -1).toLong())
-            val weekDays = getWeekDays(intent.getIntExtra("weekDays", -1))
+
             if (!weekDays.isEmpty()) {
-                AlarmScheduler(context!!).schedule(
+                AlarmScheduler(context).schedule(
                     AlarmItem(combinedID, title, time, weekDays)
                 )
                 return@runBlocking
@@ -33,7 +44,7 @@ class AlarmReceiver: BroadcastReceiver() {
             if (groupID == PageSoloViewModel.GROUP_ID) {
                 val solosDB by lazy {
                     Room.databaseBuilder(
-                        context!!,
+                        context,
                         SolosDB::class.java,
                         SolosDB.NAME
                     ).fallbackToDestructiveMigration().build()
